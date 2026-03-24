@@ -28,12 +28,9 @@ export default function App() {
   const [loadingState, setLoadingState] = useState<LoadingState>('idle')
   const [portfolio, setPortfolio] = useState<PortfolioResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [currentAddress, setCurrentAddress] = useState<string>('')
-
   const handleAnalyze = useCallback(async (address: string) => {
     setLoadingState('loading')
     setError(null)
-    setCurrentAddress(address)
 
     try {
       const data = await getPortfolio(address)
