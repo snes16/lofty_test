@@ -1,12 +1,23 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/dist",
-  "rewrites": [
-    { "source": "/health", "destination": "/api/index" },
-    { "source": "/balance/:path*", "destination": "/api/index" },
-    { "source": "/liquidity/:path*", "destination": "/api/index" },
-    { "source": "/portfolio/:path*", "destination": "/api/index" },
-    { "source": "/(.*)", "destination": "/index.html" }
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    },
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    { "src": "/health", "dest": "/api/index.py" },
+    { "src": "/balance/(.*)", "dest": "/api/index.py" },
+    { "src": "/liquidity/(.*)", "dest": "/api/index.py" },
+    { "src": "/portfolio/(.*)", "dest": "/api/index.py" },
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/(.*\\.(js|css|ico|png|svg|json|woff2?))", "dest": "/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
