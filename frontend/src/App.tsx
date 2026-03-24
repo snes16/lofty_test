@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import type { PortfolioResponse, LoadingState } from './types'
 import { getPortfolio, ApiError } from './api/portfolio'
 
@@ -8,6 +9,17 @@ import EthCard from './components/EthCard'
 import TokensTable from './components/TokensTable'
 import LiquidityPositions from './components/LiquidityPositions'
 import ErrorBanner from './components/ErrorBanner'
+import GridBackground from './components/GridBackground'
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+}
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+}
 
 // Empty portfolio placeholder for skeleton loading state
 const EMPTY_PORTFOLIO: PortfolioResponse = {
@@ -63,10 +75,9 @@ export default function App() {
   const displayPortfolio = portfolio ?? EMPTY_PORTFOLIO
 
   return (
-    <div
-      className="min-h-screen bg-grid-pattern"
-      style={{ background: '#0a0a0f' }}
-    >
+    <div className="min-h-screen" style={{ backgroundColor: '#0a0a0f' }}>
+      <GridBackground />
+
       {/* Ambient glow elements */}
       <div
         className="fixed top-0 left-1/4 w-96 h-96 rounded-full pointer-events-none"
@@ -130,89 +141,108 @@ export default function App() {
         )}
 
         {/* Portfolio Data */}
-        {showData && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Summary */}
-            <PortfolioSummary
-              portfolio={displayPortfolio}
-              isLoading={isLoading}
-            />
-
-            {/* ETH + Tokens row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* ETH Card */}
-              <div className="md:col-span-1">
-                <EthCard eth={displayPortfolio.eth} isLoading={isLoading} />
-              </div>
-
-              {/* Tokens Table */}
-              <div className="md:col-span-2">
-                <TokensTable
-                  tokens={displayPortfolio.tokens}
+        <AnimatePresence mode="wait">
+          {showData && (
+            <motion.div
+              key={portfolio?.address ?? 'loading'}
+              className="space-y-6"
+              variants={stagger}
+              initial="hidden"
+              animate="visible"
+            >
+              <motion.div variants={fadeUp}>
+                <PortfolioSummary
+                  portfolio={displayPortfolio}
                   isLoading={isLoading}
                 />
-              </div>
-            </div>
+              </motion.div>
 
-            {/* Liquidity Positions */}
-            <LiquidityPositions
-              liquidity={displayPortfolio.liquidity}
-              isLoading={isLoading}
-            />
-          </div>
-        )}
+              <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
+                  <EthCard eth={displayPortfolio.eth} isLoading={isLoading} />
+                </div>
+                <div className="md:col-span-2">
+                  <TokensTable
+                    tokens={displayPortfolio.tokens}
+                    isLoading={isLoading}
+                  />
+                </div>
+              </motion.div>
+
+              <motion.div variants={fadeUp}>
+                <LiquidityPositions
+                  liquidity={displayPortfolio.liquidity}
+                  isLoading={isLoading}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Idle / Initial state CTA */}
-        {loadingState === 'idle' && (
-          <div className="text-center py-16 animate-fade-in">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-              style={{
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(99,102,241,0.05))',
-                border: '1px solid rgba(99,102,241,0.2)',
-              }}
+        <AnimatePresence>
+          {loadingState === 'idle' && (
+            <motion.div
+              className="text-center py-16"
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
+              variants={stagger}
             >
-              <svg
-                className="w-8 h-8 text-indigo-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold text-slate-300 mb-2">
-              Analyze Any Ethereum Wallet
-            </h2>
-            <p className="text-sm text-slate-500 max-w-md mx-auto">
-              Enter an Ethereum address above to see its complete portfolio including
-              ETH balance, ERC-20 tokens, and Uniswap V2/V3 liquidity positions.
-            </p>
-
-            {/* Feature cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto mt-8">
-              {[
-                { icon: '⟠', title: 'ETH Balance', desc: 'Real-time ETH with USD value' },
-                { icon: '◈', title: 'Token Holdings', desc: 'All ERC-20 tokens with prices' },
-                { icon: '⇄', title: 'LP Positions', desc: 'Uniswap V2 & V3 positions' },
-              ].map((feature) => (
+              <motion.div variants={fadeUp}>
                 <div
-                  key={feature.title}
-                  className="glass-card-inner p-4 text-center"
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(99,102,241,0.05))',
+                    border: '1px solid rgba(99,102,241,0.2)',
+                  }}
                 >
-                  <div className="text-2xl mb-2">{feature.icon}</div>
-                  <p className="text-sm font-medium text-slate-300">{feature.title}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{feature.desc}</p>
+                  <svg
+                    className="w-8 h-8 text-indigo-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                    />
+                  </svg>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+                <h2 className="text-xl font-semibold text-slate-300 mb-2">
+                  Analyze Any Ethereum Wallet
+                </h2>
+                <p className="text-sm text-slate-500 max-w-md mx-auto">
+                  Enter an Ethereum address above to see its complete portfolio including
+                  ETH balance, ERC-20 tokens, and Uniswap V2/V3 liquidity positions.
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto mt-8"
+                variants={stagger}
+              >
+                {[
+                  { icon: '⟠', title: 'ETH Balance', desc: 'Real-time ETH with USD value' },
+                  { icon: '◈', title: 'Token Holdings', desc: 'All ERC-20 tokens with prices' },
+                  { icon: '⇄', title: 'LP Positions', desc: 'Uniswap V2 & V3 positions' },
+                ].map((feature) => (
+                  <motion.div
+                    key={feature.title}
+                    variants={fadeUp}
+                    className="glass-card-inner p-4 text-center"
+                  >
+                    <div className="text-2xl mb-2">{feature.icon}</div>
+                    <p className="text-sm font-medium text-slate-300">{feature.title}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{feature.desc}</p>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Footer */}
         <footer className="text-center pt-6 pb-2">
