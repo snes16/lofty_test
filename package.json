@@ -1,0 +1,7 @@
+{
+  "name": "web3-portfolio-root",
+  "version": "0.1.0",
+  "scripts": {
+    "vercel-build": "cd frontend && npm install && npm run build"
+  }
+}
