@@ -153,31 +153,33 @@ export default function TokensTable({ tokens, isLoading }: TokensTableProps) {
       {/* Table */}
       {(isLoading || tokens.tokens.length > 0) && (
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Token
-                </th>
-                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Balance
-                </th>
-                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 uppercase tracking-wider hidden sm:table-cell">
-                  Price
-                </th>
-                <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Value
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading
-                ? Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
-                : tokens.tokens.map((token) => (
-                    <TokenRow key={token.contract_address} token={token} />
-                  ))}
-            </tbody>
-          </table>
+          <div className="overflow-y-auto" style={{ maxHeight: '400px' }}>
+            <table className="w-full">
+              <thead className="sticky top-0 z-10" style={{ background: 'rgba(15,23,42,0.95)' }}>
+                <tr>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Token
+                  </th>
+                  <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Balance
+                  </th>
+                  <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 uppercase tracking-wider hidden sm:table-cell">
+                    Price
+                  </th>
+                  <th className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Value
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading
+                  ? Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
+                  : tokens.tokens.map((token) => (
+                      <TokenRow key={token.contract_address} token={token} />
+                    ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
